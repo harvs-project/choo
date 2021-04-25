@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "lib": ["es2020"],
+    "moduleResolution": "node",
+    "outDir": "./dist/",
+    "rootDir": "./",
+    "composite": true,
+    "tsBuildInfoFile": "./dist/.ts-build-info",
+
+    "allowJs": true,
+    "checkJs": true,
+    "esModuleInterop": true,
+
+    "skipLibCheck": true,
+    "strict": false,
+
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitReturns": false,
+    "noFallthroughCasesInSwitch": false,
+    "noUncheckedIndexedAccess": false,
+    "noPropertyAccessFromIndexSignature": false,
+
+    "allowUnreachableCode": true,
+    "allowUnusedLabels": true,
+
+    "experimentalDecorators": false,
+    "emitDecoratorMetadata": false,
+
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "declaration": true,
+    "declarationMap": true,
+    "importHelpers": true,
+    "extendedDiagnostics": false,
+    "explainFiles": false
+  },
+  "include": ["./**/*.js"],
+  "exclude": ["node_modules/", "dist/"]
+}
