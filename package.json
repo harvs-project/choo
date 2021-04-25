@@ -40,7 +40,7 @@
   "license": "MIT",
   "dependencies": {
     "document-ready": "^2.0.1",
-    "nanoassert": "^1.1.0",
+    "nanoassert": "^2.0.0",
     "nanobus": "^4.4.0",
     "nanocomponent": "^6.5.0",
     "nanohref": "^3.0.0",
