@@ -23,7 +23,7 @@
     "inspect": "browserify --full-paths index -p tinyify | discify --open",
     "prepublishOnly": "npm run build",
     "start": "bankai start example",
-    "test": "standard && npm run deps && npm run test:types && npm run test:node && npm run test:browser",
+    "test": "standard && npm run deps && npm run test:types && npm run test:node",
     "test:types": "tsd",
     "test:node": "node test/node.js | tap-format-spec",
     "test:browser": "browserify test/browser.js | tape-run | tap-format-spec"

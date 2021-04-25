@@ -9,6 +9,3 @@ coverage.json
 .DS_Store
 *.swp
 .zuulrc
-package-lock.json
-yarn.lock
-.idea
