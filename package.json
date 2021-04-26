@@ -1,12 +1,12 @@
 {
-  "name": "choo",
-  "version": "7.1.0",
-  "description": "A 4kb framework for creating sturdy frontend applications",
+  "name": "picochoo",
+  "version": "8.0.0",
+  "description": "",
   "main": "index.js",
   "files": [
     "index.js",
     "index.d.ts",
-    "html/index.js",
+    "Html/index.js",
     "html/raw.js",
     "html/index.d.ts",
     "component/cache.js",
@@ -15,15 +15,15 @@
     "example"
   ],
   "scripts": {
-    "build": "mkdir -p dist/ && browserify index -s Choo -p bundle-collapser/plugin > dist/bundle.js",
-    "prepublishOnly": "npm run build",
-    "start": "bankai start example",
     "test": "standard && npm run test:types && npm run test:node && npm run test:browser",
     "test:types": "tsd",
     "test:node": "tape test/node.js",
     "test:browser": "browserify test/browser.js | tape-run"
   },
-  "repository": "choojs/choo",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/harvs-project/picochoo.git"
+  },
   "keywords": [
     "client",
     "frontend",
