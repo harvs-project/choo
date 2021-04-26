@@ -1,8 +1,8 @@
 const tape = require('tape')
 const h = require('hyperscript')
 
-const html = require('../html')
-const raw = require('../html/raw')
+const html = require('nanohtml')
+const raw = require('nanohtml/raw')
 const choo = require('..')
 
 tape('should mount in the DOM', function (t) {

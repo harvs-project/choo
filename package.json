@@ -1,18 +1,13 @@
 {
   "name": "picochoo",
-  "version": "8.0.0",
-  "description": "",
+  "version": "9.0.0",
+  "description": "smaller choo",
   "main": "index.js",
   "files": [
     "index.js",
     "index.d.ts",
-    "Html/index.js",
-    "html/raw.js",
-    "html/index.d.ts",
     "component/cache.js",
-    "component/index.js",
-    "dist",
-    "example"
+    "component/index.js"
   ],
   "scripts": {
     "test": "standard && npm run test:types && npm run test:node && npm run test:browser",
