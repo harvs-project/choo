@@ -1,5 +1,5 @@
-var Component = require('../../component')
-var html = require('nanohtml')
+const Component = require('../../component')
+const html = require('nanohtml')
 
 module.exports = class Info extends Component {
   update () {

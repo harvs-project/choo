@@ -1,13 +1,13 @@
-var html = require('nanohtml')
+const html = require('nanohtml')
 
 module.exports = filterButton
 
 function filterButton (name, filter, currentFilter, emit) {
-  var filterClass = filter === currentFilter
+  const filterClass = filter === currentFilter
     ? 'selected'
     : ''
 
-  var uri = '#' + name.toLowerCase()
+  let uri = '#' + name.toLowerCase()
   if (uri === '#all') uri = '/'
 
   return html`<li>

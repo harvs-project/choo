@@ -1,4 +1,4 @@
-var html = require('nanohtml')
+const html = require('nanohtml')
 
 module.exports = deleteCompleted
 

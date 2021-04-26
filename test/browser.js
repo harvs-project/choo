@@ -1,18 +1,18 @@
-var tape = require('tape')
-var h = require('hyperscript')
+const tape = require('tape')
+const h = require('hyperscript')
 
-var html = require('../html')
-var raw = require('../html/raw')
-var choo = require('..')
+const html = require('../html')
+const raw = require('../html/raw')
+const choo = require('..')
 
 tape('should mount in the DOM', function (t) {
   t.plan(1)
-  var app = choo()
-  var container = init('/', 'p')
+  const app = choo()
+  const container = init('/', 'p')
   app.route('/', function (state, emit) {
-    var strong = '<strong>Hello filthy planet</strong>'
+    const strong = '<strong>Hello filthy planet</strong>'
     window.requestAnimationFrame(function () {
-      var exp = '<p><strong>Hello filthy planet</strong></p>'
+      const exp = '<p><strong>Hello filthy planet</strong></p>'
       t.equal(container.outerHTML, exp, 'result was OK')
     })
     return html`
@@ -24,11 +24,11 @@ tape('should mount in the DOM', function (t) {
 
 tape('should render with hyperscript', function (t) {
   t.plan(1)
-  var app = choo()
-  var container = init('/', 'p')
+  const app = choo()
+  const container = init('/', 'p')
   app.route('/', function (state, emit) {
     window.requestAnimationFrame(function () {
-      var exp = '<p><strong>Hello filthy planet</strong></p>'
+      const exp = '<p><strong>Hello filthy planet</strong></p>'
       t.equal(container.outerHTML, exp, 'result was OK')
     })
     return h('p', h('strong', 'Hello filthy planet'))
@@ -37,7 +37,7 @@ tape('should render with hyperscript', function (t) {
 })
 
 tape('should expose a public API', function (t) {
-  var app = choo()
+  const app = choo()
 
   t.equal(typeof app.route, 'function', 'app.route prototype method exists')
   t.equal(typeof app.toString, 'function', 'app.toString prototype method exists')
@@ -53,7 +53,7 @@ tape('should expose a public API', function (t) {
 })
 
 tape('should enable history and href by defaut', function (t) {
-  var app = choo()
+  const app = choo()
   t.true(app._historyEnabled, 'history enabled')
   t.true(app._hrefEnabled, 'href enabled')
   t.end()
@@ -61,8 +61,8 @@ tape('should enable history and href by defaut', function (t) {
 
 tape('router should pass state and emit to view', function (t) {
   t.plan(2)
-  var app = choo()
-  var container = init()
+  const app = choo()
+  const container = init()
   app.route('/', function (state, emit) {
     t.equal(typeof state, 'object', 'state is an object')
     t.equal(typeof emit, 'function', 'emit is a function')
@@ -73,8 +73,8 @@ tape('router should pass state and emit to view', function (t) {
 
 tape('router should support a default route', function (t) {
   t.plan(1)
-  var app = choo()
-  var container = init('/random')
+  const app = choo()
+  const container = init('/random')
   app.route('*', function (state, emit) {
     t.pass()
     return html`<div></div>`
@@ -84,8 +84,8 @@ tape('router should support a default route', function (t) {
 
 tape('enabling hash routing should treat hashes as slashes', function (t) {
   t.plan(1)
-  var app = choo({ hash: true })
-  var container = init('/account#security')
+  const app = choo({ hash: true })
+  const container = init('/account#security')
   app.route('/account/security', function (state, emit) {
     t.pass()
     return html`<div></div>`
@@ -95,8 +95,8 @@ tape('enabling hash routing should treat hashes as slashes', function (t) {
 
 tape('router should ignore hashes by default', function (t) {
   t.plan(1)
-  var app = choo()
-  var container = init('/account#security')
+  const app = choo()
+  const container = init('/account#security')
   app.route('/account', function (state, emit) {
     t.pass()
     return html`<div></div>`
@@ -106,10 +106,11 @@ tape('router should ignore hashes by default', function (t) {
 
 tape('cache should default to 100 instances', function (t) {
   t.plan(1)
-  var app = choo()
-  var container = init()
+  const app = choo()
+  const container = init()
   app.route('/', function (state, emit) {
-    for (var i = 0; i <= 100; i++) state.cache(Component, i)
+    let i
+    for (i = 0; i <= 100; i++) state.cache(Component, i)
     state.cache(Component, 0)
     return html`<div></div>`
 
@@ -122,10 +123,10 @@ tape('cache should default to 100 instances', function (t) {
 
 tape('cache option should override number of max instances', function (t) {
   t.plan(1)
-  var app = choo({ cache: 1 })
-  var container = init()
+  const app = choo({ cache: 1 })
+  const container = init()
   app.route('/', function (state, emit) {
-    var instances = 0
+    let instances = 0
     state.cache(Component, instances)
     state.cache(Component, instances)
     state.cache(Component, 0)
@@ -141,7 +142,7 @@ tape('cache option should override number of max instances', function (t) {
 
 tape('cache option should override default LRU cache', function (t) {
   t.plan(2)
-  var cache = {
+  const cache = {
     get (Component, id) {
       t.pass('called get')
     },
@@ -149,8 +150,8 @@ tape('cache option should override default LRU cache', function (t) {
       t.pass('called set')
     }
   }
-  var app = choo({ cache: cache })
-  var container = init()
+  const app = choo({ cache: cache })
+  const container = init()
   app.route('/', function (state, emit) {
     state.cache(Component, 'foo')
     return html`<div></div>`
@@ -164,10 +165,10 @@ tape('cache option should override default LRU cache', function (t) {
 
 tape('state should include events', function (t) {
   t.plan(2)
-  var app = choo()
-  var container = init()
+  const app = choo()
+  const container = init()
   app.route('/', function (state, emit) {
-    t.ok(state.hasOwnProperty('events'), 'state has event property')
+    t.ok(Object.prototype.hasOwnProperty.call(state, 'events'), 'state has event property')
     t.ok(Object.keys(state.events).length > 0, 'events object has keys')
     return html`<div></div>`
   })
@@ -176,15 +177,15 @@ tape('state should include events', function (t) {
 
 tape('state should include location on render', function (t) {
   t.plan(6)
-  var app = choo()
-  var container = init('/foo/bar/file.txt?bin=baz')
+  const app = choo()
+  const container = init('/foo/bar/file.txt?bin=baz')
   app.route('/:first/:second/*', function (state, emit) {
-    var params = { first: 'foo', second: 'bar', wildcard: 'file.txt' }
+    const params = { first: 'foo', second: 'bar', wildcard: 'file.txt' }
     t.equal(state.href, '/foo/bar/file.txt', 'state has href')
     t.equal(state.route, ':first/:second/*', 'state has route')
-    t.ok(state.hasOwnProperty('params'), 'state has params')
+    t.ok(Object.prototype.hasOwnProperty.call(state, 'params'), 'state has params')
     t.deepEqual(state.params, params, 'params match')
-    t.ok(state.hasOwnProperty('query'), 'state has query')
+    t.ok(Object.prototype.hasOwnProperty.call(state, 'query'), 'state has query')
     t.deepEqual(state.query, { bin: 'baz' }, 'query match')
     return html`<div></div>`
   })
@@ -193,8 +194,8 @@ tape('state should include location on render', function (t) {
 
 tape('state should include location on store init', function (t) {
   t.plan(6)
-  var app = choo()
-  var container = init('/foo/bar/file.txt?bin=baz')
+  const app = choo()
+  const container = init('/foo/bar/file.txt?bin=baz')
   app.use(store)
   app.route('/:first/:second/*', function (state, emit) {
     return html`<div></div>`
@@ -202,12 +203,12 @@ tape('state should include location on store init', function (t) {
   app.mount(container)
 
   function store (state, emit) {
-    var params = { first: 'foo', second: 'bar', wildcard: 'file.txt' }
+    const params = { first: 'foo', second: 'bar', wildcard: 'file.txt' }
     t.equal(state.href, '/foo/bar/file.txt', 'state has href')
     t.equal(state.route, ':first/:second/*', 'state has route')
-    t.ok(state.hasOwnProperty('params'), 'state has params')
+    t.ok(Object.prototype.hasOwnProperty.call(state, 'params'), 'state has params')
     t.deepEqual(state.params, params, 'params match')
-    t.ok(state.hasOwnProperty('query'), 'state has query')
+    t.ok(Object.prototype.hasOwnProperty.call(state, 'query'), 'state has query')
     t.deepEqual(state.query, { bin: 'baz' }, 'query match')
   }
 })
@@ -215,8 +216,8 @@ tape('state should include location on store init', function (t) {
 tape('state should include title', function (t) {
   t.plan(3)
   document.title = 'foo'
-  var app = choo()
-  var container = init()
+  const app = choo()
+  const container = init()
   t.equal(app.state.title, 'foo', 'title is match')
   app.use(function (state, emitter) {
     emitter.on(state.events.DOMTITLECHANGE, function (title) {
@@ -233,11 +234,11 @@ tape('state should include title', function (t) {
 
 tape('state should include cache', function (t) {
   t.plan(6)
-  var app = choo()
-  var container = init()
+  const app = choo()
+  const container = init()
   app.route('/', function (state, emit) {
     t.equal(typeof state.cache, 'function', 'state has cache method')
-    var cached = state.cache(Component, 'foo', 'arg')
+    const cached = state.cache(Component, 'foo', 'arg')
     t.equal(cached, state.cache(Component, 'foo'), 'consecutive calls return same instance')
     return html`<div></div>`
   })
@@ -257,7 +258,7 @@ function init (location, type) {
   location = location ? location.split('#') : ['/', '']
   window.history.replaceState({}, document.title, location[0])
   window.location.hash = location[1] || ''
-  var container = document.createElement(type || 'div')
+  const container = document.createElement(type || 'div')
   document.body.appendChild(container)
   return container
 }

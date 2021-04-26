@@ -1,8 +1,8 @@
-var Component = require('../../../component')
-var html = require('nanohtml')
+const Component = require('../../../component')
+const html = require('nanohtml')
 
-var clearButton = require('./clear-button')
-var filterButton = require('./filter-button')
+const clearButton = require('./clear-button')
+const filterButton = require('./filter-button')
 
 module.exports = class Footer extends Component {
   constructor (name, state, emit) {

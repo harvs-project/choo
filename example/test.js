@@ -1,12 +1,12 @@
-var EventEmitter = require('events').EventEmitter
-var spok = require('spok')
-var tape = require('tape')
+const EventEmitter = require('events').EventEmitter
+const spok = require('spok')
+const tape = require('tape')
 
-var todoStore = require('./stores/todos')
+const todoStore = require('./stores/todos')
 
 tape('should initialize empty state', function (t) {
-  var emitter = new EventEmitter()
-  var state = {}
+  const emitter = new EventEmitter()
+  const state = {}
   todoStore(state, emitter)
   spok(t, state, {
     todos: {
@@ -20,8 +20,8 @@ tape('should initialize empty state', function (t) {
 })
 
 tape('todos:create', function (t) {
-  var emitter = new EventEmitter()
-  var state = {}
+  const emitter = new EventEmitter()
+  const state = {}
   todoStore(state, emitter)
   emitter.emit('DOMContentLoaded')
 
@@ -55,8 +55,8 @@ tape('todos:create', function (t) {
 })
 
 tape('todos:update', function (t) {
-  var emitter = new EventEmitter()
-  var state = {}
+  const emitter = new EventEmitter()
+  const state = {}
   todoStore(state, emitter)
   emitter.emit('DOMContentLoaded')
 

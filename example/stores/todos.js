@@ -21,7 +21,7 @@ function todoStore (state, emitter) {
   })
 
   function create (name) {
-    var item = {
+    const item = {
       id: state.todos.idCounter,
       editing: false,
       done: false,
@@ -49,7 +49,7 @@ function todoStore (state, emitter) {
   }
 
   function update (newTodo) {
-    var todo = state.todos.all.filter(function (todo) {
+    const todo = state.todos.all.filter(function (todo) {
       return todo.id === newTodo.id
     })[0]
 
@@ -66,8 +66,8 @@ function todoStore (state, emitter) {
   }
 
   function del (id) {
-    var i = null
-    var todo = null
+    let i = null
+    let todo = null
     state.todos.all.forEach(function (_todo, j) {
       if (_todo.id === id) {
         i = j
@@ -77,8 +77,8 @@ function todoStore (state, emitter) {
     state.todos.all.splice(i, 1)
 
     if (todo.done) {
-      var done = state.todos.done
-      var doneIndex
+      const done = state.todos.done
+      let doneIndex
       done.forEach(function (_todo, j) {
         if (_todo.id === id) {
           doneIndex = j
@@ -86,8 +86,8 @@ function todoStore (state, emitter) {
       })
       done.splice(doneIndex, 1)
     } else {
-      var active = state.todos.active
-      var activeIndex
+      const active = state.todos.active
+      let activeIndex
       active.forEach(function (_todo, j) {
         if (_todo.id === id) {
           activeIndex = j
@@ -99,9 +99,9 @@ function todoStore (state, emitter) {
   }
 
   function deleteCompleted (data) {
-    var done = state.todos.done
+    const done = state.todos.done
     done.forEach(function (todo) {
-      var index = state.todos.all.indexOf(todo)
+      const index = state.todos.all.indexOf(todo)
       state.todos.all.splice(index, 1)
     })
     state.todos.done = []
@@ -109,22 +109,22 @@ function todoStore (state, emitter) {
   }
 
   function toggle (id) {
-    var todo = state.todos.all.filter(function (todo) {
+    const todo = state.todos.all.filter(function (todo) {
       return todo.id === id
     })[0]
-    var done = todo.done
+    const done = todo.done
     todo.done = !done
-    var arr = done ? state.todos.done : state.todos.active
-    var target = done ? state.todos.active : state.todos.done
-    var index = arr.indexOf(todo)
+    const arr = done ? state.todos.done : state.todos.active
+    const target = done ? state.todos.active : state.todos.done
+    const index = arr.indexOf(todo)
     arr.splice(index, 1)
     target.push(todo)
     render()
   }
 
   function toggleAll (data) {
-    var todos = state.todos.all
-    var allDone = state.todos.all.length &&
+    const todos = state.todos.all
+    const allDone = state.todos.all.length &&
       state.todos.done.length === state.todos.all.length
 
     todos.forEach(function (todo) {

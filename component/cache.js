@@ -1,5 +1,5 @@
-var assert = require('assert')
-var LRU = require('nanolru')
+const assert = require('assert')
+const LRU = require('nanolru')
 
 module.exports = ChooComponentCache
 
@@ -20,10 +20,10 @@ ChooComponentCache.prototype.render = function (Component, id) {
   assert.equal(typeof Component, 'function', 'ChooComponentCache.render: Component should be type function')
   assert.ok(typeof id === 'string' || typeof id === 'number', 'ChooComponentCache.render: id should be type string or type number')
 
-  var el = this.cache.get(id)
+  let el = this.cache.get(id)
   if (!el) {
-    var args = []
-    for (var i = 2, len = arguments.length; i < len; i++) {
+    const args = []
+    for (let i = 2, len = arguments.length; i < len; i++) {
       args.push(arguments[i])
     }
     args.unshift(Component, id, this.state, this.emit)

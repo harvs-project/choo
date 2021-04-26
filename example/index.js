@@ -1,10 +1,10 @@
-var css = require('sheetify')
-var choo = require('../')
+const css = require('sheetify')
+const choo = require('../')
 
 css('todomvc-common/base.css')
 css('todomvc-app-css/index.css')
 
-var app = choo()
+const app = choo()
 if (process.env.NODE_ENV !== 'production') {
   app.use(require('choo-devtools')())
 }

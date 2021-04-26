@@ -1,9 +1,9 @@
-var html = require('nanohtml')
+const html = require('nanohtml')
 
 module.exports = Todo
 
 function Todo (todo, emit) {
-  var clx = classList({ completed: todo.done, editing: todo.editing })
+  const clx = classList({ completed: todo.done, editing: todo.editing })
   return html`
     <li id=${todo.id} class=${clx}>
       <div class="view">
@@ -52,11 +52,11 @@ function Todo (todo, emit) {
   }
 
   function classList (classes) {
-    var str = ''
-    var keys = Object.keys(classes)
-    for (var i = 0, len = keys.length; i < len; i++) {
-      var key = keys[i]
-      var val = classes[key]
+    let str = ''
+    const keys = Object.keys(classes)
+    for (let i = 0, len = keys.length; i < len; i++) {
+      const key = keys[i]
+      const val = classes[key]
       if (val) str += (key + ' ')
     }
     return str

@@ -1,5 +1,5 @@
-var Component = require('../../component')
-var html = require('nanohtml')
+const Component = require('../../component')
+const html = require('nanohtml')
 
 module.exports = class Header extends Component {
   constructor (name, state, emit) {
@@ -23,7 +23,7 @@ module.exports = class Header extends Component {
   }
 
   createTodo (e) {
-    var value = e.target.value
+    const value = e.target.value
     if (e.keyCode === 13) {
       e.target.value = ''
       this.emit('todos:create', value)

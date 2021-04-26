@@ -1,9 +1,9 @@
-var html = require('nanohtml') // cannot require choo/html because it's a nested repo
+const html = require('nanohtml') // cannot require choo/html because it's a nested repo
 
-var Header = require('../components/header')
-var Footer = require('../components/footer')
-var Todos = require('../components/todos')
-var Info = require('../components/info')
+const Header = require('../components/header')
+const Footer = require('../components/footer')
+const Todos = require('../components/todos')
+const Info = require('../components/info')
 
 module.exports = mainView
 

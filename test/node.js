@@ -1,37 +1,37 @@
-var tape = require('tape')
-var h = require('hyperscript')
+const tape = require('tape')
+const h = require('hyperscript')
 
-var html = require('../html')
-var raw = require('../html/raw')
-var choo = require('..')
+const html = require('../html')
+const raw = require('../html/raw')
+const choo = require('..')
 
 tape('should render on the server with nanohtml', function (t) {
-  var app = choo()
+  const app = choo()
   app.route('/', function (state, emit) {
-    var strong = '<strong>Hello filthy planet</strong>'
+    const strong = '<strong>Hello filthy planet</strong>'
     return html`
       <p>${raw(strong)}</p>
     `
   })
-  var res = app.toString('/')
-  var exp = '<p><strong>Hello filthy planet</strong></p>'
+  const res = app.toString('/')
+  const exp = '<p><strong>Hello filthy planet</strong></p>'
   t.equal(res.toString().trim(), exp, 'result was OK')
   t.end()
 })
 
 tape('should render on the server with hyperscript', function (t) {
-  var app = choo()
+  const app = choo()
   app.route('/', function (state, emit) {
     return h('p', h('strong', 'Hello filthy planet'))
   })
-  var res = app.toString('/')
-  var exp = '<p><strong>Hello filthy planet</strong></p>'
+  const res = app.toString('/')
+  const exp = '<p><strong>Hello filthy planet</strong></p>'
   t.equal(res.toString().trim(), exp, 'result was OK')
   t.end()
 })
 
 tape('should expose a public API', function (t) {
-  var app = choo()
+  const app = choo()
 
   t.equal(typeof app.route, 'function', 'app.route prototype method exists')
   t.equal(typeof app.toString, 'function', 'app.toString prototype method exists')
@@ -47,7 +47,7 @@ tape('should expose a public API', function (t) {
 })
 
 tape('should enable history and hash by defaut', function (t) {
-  var app = choo()
+  const app = choo()
   t.true(app._historyEnabled, 'history enabled')
   t.true(app._hrefEnabled, 'href enabled')
   t.end()
@@ -55,7 +55,7 @@ tape('should enable history and hash by defaut', function (t) {
 
 tape('router should pass state and emit to view', function (t) {
   t.plan(2)
-  var app = choo()
+  const app = choo()
   app.route('/', function (state, emit) {
     t.equal(typeof state, 'object', 'state is an object')
     t.equal(typeof emit, 'function', 'emit is a function')
@@ -67,7 +67,7 @@ tape('router should pass state and emit to view', function (t) {
 
 tape('router should support a default route', function (t) {
   t.plan(1)
-  var app = choo()
+  const app = choo()
   app.route('*', function (state, emit) {
     t.pass()
     return html`<div></div>`
@@ -78,7 +78,7 @@ tape('router should support a default route', function (t) {
 
 tape('enabling hash routing should treat hashes as slashes', function (t) {
   t.plan(1)
-  var app = choo({ hash: true })
+  const app = choo({ hash: true })
   app.route('/account/security', function (state, emit) {
     t.pass()
     return html`<div></div>`
@@ -89,7 +89,7 @@ tape('enabling hash routing should treat hashes as slashes', function (t) {
 
 tape('router should ignore hashes by default', function (t) {
   t.plan(1)
-  var app = choo()
+  const app = choo()
   app.route('/account', function (state, emit) {
     t.pass()
     return html`<div></div>`
@@ -100,9 +100,10 @@ tape('router should ignore hashes by default', function (t) {
 
 tape('cache should default to 100 instances', function (t) {
   t.plan(1)
-  var app = choo()
+  const app = choo()
   app.route('/', function (state, emit) {
-    for (var i = 0; i <= 100; i++) state.cache(Component, i)
+    let i
+    for (i = 0; i <= 100; i++) state.cache(Component, i)
     state.cache(Component, 0)
     return html`<div></div>`
 
@@ -116,9 +117,9 @@ tape('cache should default to 100 instances', function (t) {
 
 tape('cache option should override number of max instances', function (t) {
   t.plan(1)
-  var app = choo({ cache: 1 })
+  const app = choo({ cache: 1 })
   app.route('/', function (state, emit) {
-    var instances = 0
+    let instances = 0
     state.cache(Component, instances)
     state.cache(Component, instances)
     state.cache(Component, 0)
@@ -135,7 +136,7 @@ tape('cache option should override number of max instances', function (t) {
 
 tape('cache option should override default LRU cache', function (t) {
   t.plan(2)
-  var cache = {
+  const cache = {
     get (Component, id) {
       t.pass('called get')
     },
@@ -143,7 +144,7 @@ tape('cache option should override default LRU cache', function (t) {
       t.pass('called set')
     }
   }
-  var app = choo({ cache: cache })
+  const app = choo({ cache: cache })
   app.route('/', function (state, emit) {
     state.cache(Component, 'foo')
     return html`<div></div>`
@@ -158,9 +159,9 @@ tape('cache option should override default LRU cache', function (t) {
 
 tape('state should include events', function (t) {
   t.plan(2)
-  var app = choo()
+  const app = choo()
   app.route('/', function (state, emit) {
-    t.ok(state.hasOwnProperty('events'), 'state has event property')
+    t.ok(Object.prototype.hasOwnProperty.call(state, 'events'), 'state has event property')
     t.ok(Object.keys(state.events).length > 0, 'events object has keys')
     return html`<div></div>`
   })
@@ -170,14 +171,14 @@ tape('state should include events', function (t) {
 
 tape('state should include location on render', function (t) {
   t.plan(6)
-  var app = choo()
+  const app = choo()
   app.route('/:first/:second/*', function (state, emit) {
-    var params = { first: 'foo', second: 'bar', wildcard: 'file.txt' }
+    const params = { first: 'foo', second: 'bar', wildcard: 'file.txt' }
     t.equal(state.href, '/foo/bar/file.txt', 'state has href')
     t.equal(state.route, ':first/:second/*', 'state has route')
-    t.ok(state.hasOwnProperty('params'), 'state has params')
+    t.ok(Object.prototype.hasOwnProperty.call(state, 'params'), 'state has params')
     t.deepEqual(state.params, params, 'params match')
-    t.ok(state.hasOwnProperty('query'), 'state has query')
+    t.ok(Object.prototype.hasOwnProperty.call(state, 'query'), 'state has query')
     t.deepLooseEqual(state.query, { bin: 'baz' }, 'query match')
     return html`<div></div>`
   })
@@ -187,7 +188,7 @@ tape('state should include location on render', function (t) {
 
 tape('state should include location on store init', function (t) {
   t.plan(6)
-  var app = choo()
+  const app = choo()
   app.use(store)
   app.route('/:first/:second/*', function (state, emit) {
     return html`<div></div>`
@@ -195,22 +196,22 @@ tape('state should include location on store init', function (t) {
   app.toString('/foo/bar/file.txt?bin=baz')
 
   function store (state, emit) {
-    var params = { first: 'foo', second: 'bar', wildcard: 'file.txt' }
+    const params = { first: 'foo', second: 'bar', wildcard: 'file.txt' }
     t.equal(state.href, '/foo/bar/file.txt', 'state has href')
     t.equal(state.route, ':first/:second/*', 'state has route')
-    t.ok(state.hasOwnProperty('params'), 'state has params')
+    t.ok(Object.prototype.hasOwnProperty.call(state, 'params'), 'state has params')
     t.deepEqual(state.params, params, 'params match')
-    t.ok(state.hasOwnProperty('query'), 'state has query')
+    t.ok(Object.prototype.hasOwnProperty.call(state, 'query'), 'state has query')
     t.deepLooseEqual(state.query, { bin: 'baz' }, 'query match')
   }
 })
 
 tape('state should include cache', function (t) {
   t.plan(6)
-  var app = choo()
+  const app = choo()
   app.route('/', function (state, emit) {
     t.equal(typeof state.cache, 'function', 'state has cache method')
-    var cached = state.cache(Component, 'foo', 'arg')
+    const cached = state.cache(Component, 'foo', 'arg')
     t.equal(cached, state.cache(Component, 'foo'), 'consecutive calls return same instance')
     return html`<div></div>`
   })
@@ -228,18 +229,18 @@ tape('state should include cache', function (t) {
 tape('state should not mutate on toString', function (t) {
   t.plan(6)
 
-  var app = choo()
+  const app = choo()
   app.use(store)
 
-  var routes = ['foo', 'bar']
-  var states = routes.map(function (route) {
-    var state = {}
+  const routes = ['foo', 'bar']
+  const states = routes.map(function (route) {
+    const state = {}
     app.route(`/${route}`, view)
     app.toString(`/${route}`, state)
     return state
   })
 
-  for (var i = 0, len = routes.length; i < len; i++) {
+  for (let i = 0, len = routes.length; i < len; i++) {
     t.equal(states[i].test, routes[i], 'store was used')
     t.equal(states[i].title, routes[i], 'title was added to state')
   }
