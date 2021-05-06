@@ -1,18 +1,13 @@
 {
   "name": "picochoo",
-  "version": "8.0.0",
-  "description": "",
+  "version": "9.0.0",
+  "description": "smaller choo",
   "main": "index.js",
   "files": [
     "index.js",
     "index.d.ts",
-    "Html/index.js",
-    "html/raw.js",
-    "html/index.d.ts",
     "component/cache.js",
-    "component/index.js",
-    "dist",
-    "example"
+    "component/index.js"
   ],
   "scripts": {
     "test": "standard && npm run test:types && npm run test:node && npm run test:browser",
@@ -36,7 +31,6 @@
   "dependencies": {
     "document-ready": "^2.0.2",
     "nanobus": "^4.5.0",
-    "nanocomponent": "^6.6.0",
     "nanohref": "^3.1.0",
     "nanohtml": "^1.9.1",
     "nanolru": "^1.0.0",
@@ -55,7 +49,8 @@
     "standard": "^16.0.3",
     "tape": "^5.2.2",
     "tape-run": "^9.0.0",
-    "tsd": "^0.14.0"
+    "tsd": "^0.14.0",
+    "typescript": "^4.2.4"
   },
   "tsd": {
     "compilerOptions": {
