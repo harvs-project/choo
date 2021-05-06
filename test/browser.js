@@ -7,7 +7,7 @@ const choo = require('..')
 
 tape('should mount in the DOM', function (t) {
   t.plan(1)
-  const app = choo()
+  const app = new choo()
   const container = init('/', 'p')
   app.route('/', function (state, emit) {
     const strong = '<strong>Hello filthy planet</strong>'
@@ -24,7 +24,7 @@ tape('should mount in the DOM', function (t) {
 
 tape('should render with hyperscript', function (t) {
   t.plan(1)
-  const app = choo()
+  const app = new choo()
   const container = init('/', 'p')
   app.route('/', function (state, emit) {
     window.requestAnimationFrame(function () {
@@ -37,7 +37,7 @@ tape('should render with hyperscript', function (t) {
 })
 
 tape('should expose a public API', function (t) {
-  const app = choo()
+  const app = new choo()
 
   t.equal(typeof app.route, 'function', 'app.route prototype method exists')
   t.equal(typeof app.toString, 'function', 'app.toString prototype method exists')
@@ -53,7 +53,7 @@ tape('should expose a public API', function (t) {
 })
 
 tape('should enable history and href by defaut', function (t) {
-  const app = choo()
+  const app = new choo()
   t.true(app._historyEnabled, 'history enabled')
   t.true(app._hrefEnabled, 'href enabled')
   t.end()
@@ -61,7 +61,7 @@ tape('should enable history and href by defaut', function (t) {
 
 tape('router should pass state and emit to view', function (t) {
   t.plan(2)
-  const app = choo()
+  const app = new choo()
   const container = init()
   app.route('/', function (state, emit) {
     t.equal(typeof state, 'object', 'state is an object')
@@ -73,7 +73,7 @@ tape('router should pass state and emit to view', function (t) {
 
 tape('router should support a default route', function (t) {
   t.plan(1)
-  const app = choo()
+  const app = new choo()
   const container = init('/random')
   app.route('*', function (state, emit) {
     t.pass()
@@ -84,7 +84,7 @@ tape('router should support a default route', function (t) {
 
 tape('enabling hash routing should treat hashes as slashes', function (t) {
   t.plan(1)
-  const app = choo({ hash: true })
+  const app = new choo({ hash: true })
   const container = init('/account#security')
   app.route('/account/security', function (state, emit) {
     t.pass()
@@ -95,7 +95,7 @@ tape('enabling hash routing should treat hashes as slashes', function (t) {
 
 tape('router should ignore hashes by default', function (t) {
   t.plan(1)
-  const app = choo()
+  const app = new choo()
   const container = init('/account#security')
   app.route('/account', function (state, emit) {
     t.pass()
@@ -106,7 +106,7 @@ tape('router should ignore hashes by default', function (t) {
 
 tape('cache should default to 100 instances', function (t) {
   t.plan(1)
-  const app = choo()
+  const app = new choo()
   const container = init()
   app.route('/', function (state, emit) {
     let i
@@ -123,7 +123,7 @@ tape('cache should default to 100 instances', function (t) {
 
 tape('cache option should override number of max instances', function (t) {
   t.plan(1)
-  const app = choo({ cache: 1 })
+  const app = new choo({ cache: 1 })
   const container = init()
   app.route('/', function (state, emit) {
     let instances = 0
@@ -150,7 +150,7 @@ tape('cache option should override default LRU cache', function (t) {
       t.pass('called set')
     }
   }
-  const app = choo({ cache: cache })
+  const app = new choo({ cache: cache })
   const container = init()
   app.route('/', function (state, emit) {
     state.cache(Component, 'foo')
@@ -165,7 +165,7 @@ tape('cache option should override default LRU cache', function (t) {
 
 tape('state should include events', function (t) {
   t.plan(2)
-  const app = choo()
+  const app = new choo()
   const container = init()
   app.route('/', function (state, emit) {
     t.ok(Object.prototype.hasOwnProperty.call(state, 'events'), 'state has event property')
@@ -177,7 +177,7 @@ tape('state should include events', function (t) {
 
 tape('state should include location on render', function (t) {
   t.plan(6)
-  const app = choo()
+  const app = new choo()
   const container = init('/foo/bar/file.txt?bin=baz')
   app.route('/:first/:second/*', function (state, emit) {
     const params = { first: 'foo', second: 'bar', wildcard: 'file.txt' }
@@ -194,7 +194,7 @@ tape('state should include location on render', function (t) {
 
 tape('state should include location on store init', function (t) {
   t.plan(6)
-  const app = choo()
+  const app = new choo()
   const container = init('/foo/bar/file.txt?bin=baz')
   app.use(store)
   app.route('/:first/:second/*', function (state, emit) {
@@ -216,7 +216,7 @@ tape('state should include location on store init', function (t) {
 tape('state should include title', function (t) {
   t.plan(3)
   document.title = 'foo'
-  const app = choo()
+  const app = new choo()
   const container = init()
   t.equal(app.state.title, 'foo', 'title is match')
   app.use(function (state, emitter) {
@@ -234,7 +234,7 @@ tape('state should include title', function (t) {
 
 tape('state should include cache', function (t) {
   t.plan(6)
-  const app = choo()
+  const app = new choo()
   const container = init()
   app.route('/', function (state, emit) {
     t.equal(typeof state.cache, 'function', 'state has cache method')

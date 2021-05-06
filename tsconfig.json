@@ -2,12 +2,12 @@
   "compilerOptions": {
     "target": "es2020",
     "module": "commonjs",
-    "lib": ["es2020"],
+    "lib": ["es2020", "dom"],
     "moduleResolution": "node",
     "outDir": "./dist/",
     "rootDir": "./",
     "composite": true,
-    "tsBuildInfoFile": "./dist/.ts-build-info",
+    "tsBuildInfoFile": ".ts-build-info",
 
     "allowJs": true,
     "checkJs": true,
@@ -37,6 +37,7 @@
     "extendedDiagnostics": false,
     "explainFiles": false
   },
-  "include": ["./**/*.js"],
+  "include": ["./component/**/*.js",
+              "./index.js"],
   "exclude": ["node_modules/", "dist/"]
 }

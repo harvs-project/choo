@@ -11,272 +11,449 @@ const assert = require('assert')
 
 const Cache = require('./component/cache')
 
-module.exports = Choo
+/** TODO: improve type
+ * @typedef {{ nodeName: string
+ *           ; outerHTML: unknown }} Tree
+ */
 
-const HISTORY_OBJECT = {}
+/** TODO: improve type
+ * @typedef {Partial<{ events:     object
+ *                   ; components: object
+ *                   ; href:       string
+ *                   ; title:      string
+ *                   ; query:      unknown
+ *                   ; route:      unknown
+ *                   ; params:     unknown
+ *                   ; cache:      unknown}>} State
+ */
 
-function Choo (opts) {
-  const timing = nanotiming('choo.constructor')
-  if (!(this instanceof Choo)) return new Choo(opts)
-  opts = opts || {}
+/** TODO: improve type
+ * @typedef {{ href: string
+ *           ; hash: string }} Location
+ */
 
-  assert.equal(typeof opts, 'object', 'choo: opts should be type object')
+/** TODO: improve type
+ * @typedef {(state: State) => unknown} Store
+ */
 
-  const self = this
+module.exports = class choo {
+  /** TODO: improve type
+   * @private
+   */
+  HISTORY_OBJECT
 
-  // define events used by choo
-  this._events = {
-    DOMCONTENTLOADED: 'DOMContentLoaded',
-    DOMTITLECHANGE: 'DOMTitleChange',
-    REPLACESTATE: 'replaceState',
-    PUSHSTATE: 'pushState',
-    NAVIGATE: 'navigate',
-    POPSTATE: 'popState',
-    RENDER: 'render'
-  }
+  /** TODO: improve type
+   * @private
+   * @readonly
+   * @type {nanotiming}
+   */
+  timing
 
-  // properties for internal use only
-  this._historyEnabled = opts.history === undefined ? true : opts.history
-  this._hrefEnabled = opts.href === undefined ? true : opts.href
-  this._hashEnabled = opts.hash === undefined ? false : opts.hash
-  this._hasWindow = typeof window !== 'undefined'
-  this._cache = opts.cache
-  this._loaded = false
-  this._stores = [ondomtitlechange]
-  this._tree = null
+  /**
+   * @private
+   * @type {object}
+   * @readonly
+   */
+  _events
 
-  // state
-  const _state = {
-    events: this._events,
-    components: {}
-  }
-  if (this._hasWindow) {
-    this.state = window.initialState
-      ? Object.assign({}, window.initialState, _state)
-      : _state
-    delete window.initialState
-  } else {
-    this.state = _state
-  }
+  /**
+   * @private
+   * @readonly
+   * @type {boolean}
+   */
+  _historyEnabled
 
-  // properties that are part of the API
-  this.router = nanorouter({ curry: true })
-  this.emitter = nanobus('choo.emit')
-  this.emit = this.emitter.emit.bind(this.emitter)
+  /**
+   * @private
+   * @readonly
+   * @type {boolean}
+   */
+  _hrefEnabled
 
-  // listen for title changes; available even when calling .toString()
-  if (this._hasWindow) this.state.title = document.title
-  function ondomtitlechange (state) {
-    self.emitter.prependListener(self._events.DOMTITLECHANGE, function (title) {
-      assert.equal(typeof title, 'string', 'events.DOMTitleChange: title should be type string')
-      state.title = title
-      if (self._hasWindow) document.title = title
-    })
-  }
-  timing()
-}
+  /**
+   * @private
+   * @readonly
+   * @type {boolean}
+   */
+  _hashEnabled
 
-Choo.prototype.route = function (route, handler) {
-  const routeTiming = nanotiming("choo.route('" + route + "')")
-  assert.equal(typeof route, 'string', 'choo.route: route should be type string')
-  assert.equal(typeof handler, 'function', 'choo.handler: route should be type function')
-  this.router.on(route, handler)
-  routeTiming()
-}
+  /**
+   * @private
+   * @readonly
+   * @type {boolean}
+   */
+  _hasWindow
 
-Choo.prototype.use = function (cb) {
-  assert.equal(typeof cb, 'function', 'choo.use: cb should be type function')
-  const self = this
-  this._stores.push(function (state) {
-    let msg = 'choo.use'
-    msg = cb.storeName ? msg + '(' + cb.storeName + ')' : msg
-    const endTiming = nanotiming(msg)
-    cb(state, self.emitter, self)
-    endTiming()
-  })
-}
+  /** TODO: improve type
+   * @private
+   * @type {unknown}
+   */
+  _cache
 
-Choo.prototype.start = function () {
-  assert.equal(typeof window, 'object', 'choo.start: window was not found. .start() must be called in a browser, use .toString() if running in Node')
-  const startTiming = nanotiming('choo.start')
+  /**
+   * @private
+   * @type {boolean}
+   */
+  _loaded
 
-  const self = this
-  if (this._historyEnabled) {
-    this.emitter.prependListener(this._events.NAVIGATE, function () {
-      self._matchRoute(self.state)
-      if (self._loaded) {
-        self.emitter.emit(self._events.RENDER)
-        setTimeout(scrollToAnchor.bind(null, window.location.hash), 0)
-      }
-    })
+  /**
+   * @private
+   * @type {Array<Store>}
+   */
+  _stores
 
-    this.emitter.prependListener(this._events.POPSTATE, function () {
-      self.emitter.emit(self._events.NAVIGATE)
-    })
+  /**
+   * @private
+   * @type {Tree}
+   */
+  _tree
 
-    this.emitter.prependListener(this._events.PUSHSTATE, function (href) {
-      assert.equal(typeof href, 'string', 'events.pushState: href should be type string')
-      window.history.pushState(HISTORY_OBJECT, null, href)
-      self.emitter.emit(self._events.NAVIGATE)
-    })
+  /**
+   * @private
+   * @type {State}
+   */
+  state
 
-    this.emitter.prependListener(this._events.REPLACESTATE, function (href) {
-      assert.equal(typeof href, 'string', 'events.replaceState: href should be type string')
-      window.history.replaceState(HISTORY_OBJECT, null, href)
-      self.emitter.emit(self._events.NAVIGATE)
-    })
+  /**
+   * @public
+   * @readonly
+   * @type {nanorouter}
+   */
+  router
 
-    window.onpopstate = function () {
-      self.emitter.emit(self._events.POPSTATE)
+  /**
+   * @public
+   * @readonly
+   * @type nanobus
+   */
+  emitter
+
+  /**
+   * @public
+   * @readonly
+   * @type unknown
+   */
+  emit
+
+  /**
+   * @param {{ history?: boolean
+   *         ; href?:    boolean
+   *         ; hash?:    boolean
+   *         ; cache?:   object }} opts
+   */
+  constructor(opts = {}) {
+    this.timing = new nanotiming('Picochoo.constructor')
+
+    this.HISTORY_OBJECT = {}
+
+    // define events used by choo
+    this._events = {
+      DOMCONTENTLOADED: 'DOMContentLoaded',
+      DOMTITLECHANGE: 'DOMTitleChange',
+      REPLACESTATE: 'replaceState',
+      PUSHSTATE: 'pushState',
+      NAVIGATE: 'navigate',
+      POPSTATE: 'popState',
+      RENDER: 'render'
     }
 
-    if (self._hrefEnabled) {
-      nanohref(function (location) {
-        const href = location.href
-        const hash = location.hash
-        if (href === window.location.href) {
-          if (!self._hashEnabled && hash) scrollToAnchor(hash)
-          return
-        }
-        self.emitter.emit(self._events.PUSHSTATE, href)
+    this._historyEnabled = opts.history === undefined ? true : opts.history
+    this._hrefEnabled = opts.href === undefined ? true : opts.href
+    this._hashEnabled = opts.hash === undefined ? false : opts.hash
+    this._hasWindow = typeof window !== 'undefined'
+
+    const ondomtitlechange = (/** @type {State} */state) => {
+      this.emitter.prependListener(this._events.DOMTITLECHANGE, (/** @type {string} */title) => {
+        assert.equal(typeof title, 'string', 'events.DOMTitleChange: title should be type string')
+        state.title = title
+        if (this._hasWindow) document.title = title
       })
     }
-  }
 
-  this._setCache(this.state)
-  this._matchRoute(this.state)
-  this._stores.forEach(function (initStore) {
-    initStore(self.state)
-  })
+    this._cache = opts.cache
+    this._loaded = false
+    this._stores = [ondomtitlechange]
+    this._tree = null
 
-  this._tree = this._prerender(this.state)
-  assert.ok(this._tree, 'choo.start: no valid DOM node returned for location ' + this.state.href)
+    const _state = {
+      events: this._events,
+      components: {}
+    };
 
-  this.emitter.prependListener(self._events.RENDER, nanoraf(function () {
-    const renderTiming = nanotiming('choo.render')
-    const newTree = self._prerender(self.state)
-    assert.ok(newTree, 'choo.render: no valid DOM node returned for location ' + self.state.href)
-
-    assert.equal(self._tree.nodeName, newTree.nodeName, 'choo.render: The target node <' +
-      self._tree.nodeName.toLowerCase() + '> is not the same type as the new node <' +
-      newTree.nodeName.toLowerCase() + '>.')
-
-    const morphTiming = nanotiming('choo.morph')
-    nanomorph(self._tree, newTree)
-    morphTiming()
-
-    renderTiming()
-  }))
-
-  documentReady(function () {
-    self.emitter.emit(self._events.DOMCONTENTLOADED)
-    self._loaded = true
-  })
-
-  startTiming()
-  return this._tree
-}
-
-Choo.prototype.mount = function mount (selector) {
-  const mountTiming = nanotiming("choo.mount('" + selector + "')")
-  if (typeof window !== 'object') {
-    assert.ok(typeof selector === 'string', 'choo.mount: selector should be type String')
-    this.selector = selector
-    mountTiming()
-    return this
-  }
-
-  assert.ok(typeof selector === 'string' || typeof selector === 'object', 'choo.mount: selector should be type String or HTMLElement')
-
-  const self = this
-
-  documentReady(function () {
-    const renderTiming = nanotiming('choo.render')
-    const newTree = self.start()
-    if (typeof selector === 'string') {
-      self._tree = document.querySelector(selector)
+    if (this._hasWindow) {
+      this.state = window?.['initialState']
+        ? Object.assign({}, window['initialState'], _state)
+        : _state
+      delete window['initialState']
     } else {
-      self._tree = selector
+      this.state = _state
     }
 
-    assert.ok(self._tree, 'choo.mount: could not query selector: ' + selector)
-    assert.equal(self._tree.nodeName, newTree.nodeName, 'choo.mount: The target node <' +
-      self._tree.nodeName.toLowerCase() + '> is not the same type as the new node <' +
+    // properties that are part of the API
+    this.router = nanorouter({ curry: true })
+    this.emitter = new nanobus('choo.emit')
+    this.emit = this.emitter.emit.bind(this.emitter)
+
+    // listen for title changes; available even when calling .toString()
+    if (this._hasWindow) this.state.title = document.title
+
+    this.timing()
+  }
+
+  /**
+   * @public
+   * @param {string} route
+   * @param {function} handler
+   * @return void
+   */
+  route(route, handler) {
+    const timing = nanotiming("choo.route('" + route + "')")
+    this.router.on(route, handler)
+    timing()
+  }
+
+  /**
+    * @pbulic
+    * @param {{ storeName: string } & Function} cb
+    * @return void
+    */
+  use(cb) {
+    this._stores.push((state) => {
+      let msg = 'choo.use'
+      msg = cb.storeName ? msg + '(' + cb.storeName + ')' : msg
+      const timing = nanotiming(msg)
+      cb(state, this.emitter, this)
+      timing()
+    })
+  }
+
+  /**
+   * @return {Tree}
+   */
+  start() {
+    const timing = nanotiming('choo.start')
+
+    if (this._historyEnabled) {
+      this.emitter.prependListener(this._events.NAVIGATE, () => {
+        this._matchRoute(this.state)
+        if (this._loaded) {
+          this.emitter.emit(this._events.RENDER)
+          setTimeout(scrollToAnchor.bind(null, window.location.hash), 0)
+        }
+      })
+
+      this.emitter.prependListener(this._events.POPSTATE, function () {
+        this.emitter.emit(this._events.NAVIGATE)
+      })
+
+      this.emitter.prependListener(this._events.PUSHSTATE, (/** @type {string} */href) => {
+        window.history.pushState(this.HISTORY_OBJECT, null, href)
+        this.emitter.emit(this._events.NAVIGATE)
+      })
+
+      this.emitter.prependListener(this._events.REPLACESTATE, (/** @type {string} */href) => {
+        window.history.replaceState(this.HISTORY_OBJECT, null, href)
+        this.emitter.emit(this._events.NAVIGATE)
+      })
+
+      window.onpopstate = () => {
+        this.emitter.emit(this._events.POPSTATE)
+      }
+
+      if (this._hrefEnabled) {
+        nanohref((/** @type {Location} */location) => {
+          const href = location.href
+          const hash = location.hash
+          if (href === window.location.href) {
+            if (!this._hashEnabled && hash) scrollToAnchor(hash)
+            return
+          }
+          this.emitter.emit(this._events.PUSHSTATE, href)
+        })
+      }
+    }
+
+    this._setCache(this.state)
+    this._matchRoute(this.state)
+    this._stores.forEach((/** @type {Function} */initStore) => {
+      initStore(this.state)
+    })
+
+    this._tree = this._prerender(this.state)
+    assert.ok(this._tree, 'choo.start: no valid DOM node returned for location ' + this.state.href)
+
+    this.emitter.prependListener(this._events.RENDER, nanoraf(() => {
+      const renderTiming = nanotiming('choo.render')
+      const newTree = this._prerender(this.state)
+      assert.ok(newTree, 'choo.render: no valid DOM node returned for location ' + this.state.href)
+
+      assert.equal(this._tree.nodeName, newTree.nodeName, 'choo.render: The target node <' +
+                   this._tree.nodeName.toLowerCase() + '> is not the same type as the new node <' +
       newTree.nodeName.toLowerCase() + '>.')
 
-    const morphTiming = nanotiming('choo.morph')
-    nanomorph(self._tree, newTree)
-    morphTiming()
+      const morphTiming = nanotiming('choo.morph')
+      nanomorph(this._tree, newTree)
+      morphTiming()
 
-    renderTiming()
-  })
-  mountTiming()
-}
+      renderTiming()
+    }))
 
-Choo.prototype.toString = function (location, state) {
-  state = state || {}
-  state.components = state.components || {}
-  state.events = Object.assign({}, state.events, this._events)
+    documentReady(() => {
+      this.emitter.emit(this._events.DOMCONTENTLOADED)
+      this._loaded = true
+    })
 
-  assert.notEqual(typeof window, 'object', 'choo.mount: window was found. .toString() must be called in Node, use .start() or .mount() if running in the browser')
-  assert.equal(typeof location, 'string', 'choo.toString: location should be type string')
-  assert.equal(typeof state, 'object', 'choo.toString: state should be type object')
-
-  this._setCache(state)
-  this._matchRoute(state, location)
-  this.emitter.removeAllListeners()
-  this._stores.forEach(function (initStore) {
-    initStore(state)
-  })
-
-  const html = this._prerender(state)
-  assert.ok(html, 'choo.toString: no valid value returned for the route ' + location)
-  assert(!Array.isArray(html), 'choo.toString: return value was an array for the route ' + location)
-  return typeof html.outerHTML === 'string' ? html.outerHTML : html.toString()
-}
-
-Choo.prototype._matchRoute = function (state, locationOverride) {
-  let location, queryString
-  if (locationOverride) {
-    location = locationOverride.replace(/\?.+$/, '').replace(/\/$/, '')
-    if (!this._hashEnabled) location = location.replace(/#.+$/, '')
-    queryString = locationOverride
-  } else {
-    location = window.location.pathname.replace(/\/$/, '')
-    if (this._hashEnabled) location += window.location.hash.replace(/^#/, '/')
-    queryString = window.location.search
+    timing()
+    return this._tree
   }
-  const matched = this.router.match(location)
-  this._handler = matched.cb
-  state.href = location
-  state.query = nanoquery(queryString)
-  state.route = matched.route
-  state.params = matched.params
-}
 
-Choo.prototype._prerender = function (state) {
-  const routeTiming = nanotiming("choo.prerender('" + state.route + "')")
-  const res = this._handler(state, this.emit)
-  routeTiming()
-  return res
-}
-
-Choo.prototype._setCache = function (state) {
-  const cache = new Cache(state, this.emitter.emit.bind(this.emitter), this._cache)
-  state.cache = renderComponent
-
-  function renderComponent (Component, id) {
-    assert.equal(typeof Component, 'function', 'choo.state.cache: Component should be type function')
-    const args = []
-    for (let i = 0, len = arguments.length; i < len; i++) {
-      args.push(arguments[i])
+  /**
+   * @param {string | object} selector
+   */
+  mount(selector) {
+    const timing = nanotiming("choo.mount('" + selector + "')")
+    if (typeof window !== 'object') {
+      assert.ok(typeof selector === 'string', 'choo.mount: selector should be type String')
+      this.selector = selector
+      timing()
+      return this
     }
-    return cache.render.apply(cache, args)
+
+    assert.ok(typeof selector === 'string' || typeof selector === 'object', 'choo.mount: selector should be type String or HTMLElement')
+
+    documentReady(() => {
+      const timing = nanotiming('choo.render')
+      const newTree = this.start()
+      if (typeof selector === 'string') {
+        this._tree = document.querySelector(selector)
+      } else {
+        this._tree = selector
+      }
+
+      assert.ok(this._tree, 'choo.mount: could not query selector: ' + selector)
+      assert.equal(this._tree.nodeName, newTree.nodeName, 'choo.mount: The target node <' +
+                   this._tree.nodeName.toLowerCase() + '> is not the same type as the new node <' +
+      newTree.nodeName.toLowerCase() + '>.')
+
+      const morphTiming = nanotiming('choo.morph')
+      nanomorph(this._tree, newTree)
+      morphTiming()
+
+      timing()
+    })
+
+    documentReady(() => {
+      const timing = nanotiming('choo.render')
+      const newTree = this.start()
+
+      if (typeof selector === 'string') {
+        this._tree = document.querySelector(selector)
+      } else {
+        this._tree = selector
+      }
+
+      assert.ok(this._tree, 'choo.mount: could not query selector: ' + selector)
+      assert.equal(this._tree.nodeName, newTree.nodeName, 'choo.mount: The target node <' +
+                   this._tree.nodeName.toLowerCase() + '> is not the same type as the new node <' +
+                   newTree.nodeName.toLowerCase() + '>.')
+
+      const morphTiming = nanotiming('choo.morph')
+      nanomorph(this._tree, newTree)
+      morphTiming()
+
+      timing()
+    })
+
+    timing()
   }
 
-  // When the state gets stringified, make sure `state.cache` isn't
-  // stringified too.
-  renderComponent.toJSON = function () {
-    return null
+  /**
+   * @param {string} location
+   * @param {Partial<State>} state
+   */
+  toString(location, state) {
+    state = state || {}
+    state.components = state.components || {}
+    state.events = Object.assign({}, state.events, this._events)
+
+    assert.notEqual(typeof window, 'object', 'choo.mount: window was found. .toString() must be called in Node, use .start() or .mount() if running in the browser')
+    assert.equal(typeof location, 'string', 'choo.toString: location should be type string')
+    assert.equal(typeof state, 'object', 'choo.toString: state should be type object')
+
+    this._setCache(state)
+    this._matchRoute(state, location)
+    this.emitter.removeAllListeners()
+    this._stores.forEach((/** @type {Function}*/initStore) => {
+      initStore(state)
+    })
+
+    const html = this._prerender(state)
+    assert.ok(html, 'choo.toString: no valid value returned for the route ' + location)
+    assert(!Array.isArray(html), 'choo.toString: return value was an array for the route ' + location)
+    return typeof html.outerHTML === 'string' ? html.outerHTML : html.toString()
+  }
+
+  /**
+   * @private
+   * @param {State} state
+   * @param {string | undefined} locationOverride
+   * @return {void}
+   */
+  _matchRoute(state, locationOverride = void 0) {
+    let location, queryString
+    if (locationOverride) {
+      location = locationOverride.replace(/\?.+$/, '').replace(/\/$/, '')
+      if (!this._hashEnabled) location = location.replace(/#.+$/, '')
+      queryString = locationOverride
+    } else {
+      location = window.location.pathname.replace(/\/$/, '')
+      if (this._hashEnabled) location += window.location.hash.replace(/^#/, '/')
+      queryString = window.location.search
+    }
+
+    const matched = this.router.match(location)
+
+    this._handler = matched.cb
+    state.href = location
+    state.query = nanoquery(queryString)
+    state.route = matched.route
+    state.params = matched.params
+  }
+
+  /**
+   * @private
+   * @param {State} state
+   * @return {Tree}
+   */
+  _prerender(state) {
+    const timing = nanotiming("choo.prerender('" + state.route + "')")
+    const res = this._handler(state, this.emit)
+    timing()
+    return res
+  }
+
+  /**
+   * @oruvate
+   * @return {void}
+   */
+  _setCache(/** @type {State} */state) {
+    const cache = new Cache(state, this.emitter.emit.bind(this.emitter), this._cache)
+    state.cache = renderComponent
+
+    function renderComponent (/** @type {Function} */Component, /** @type {string} */id) {
+      assert.equal(typeof Component, 'function', 'choo.state.cache: Component should be type function')
+      let args = []
+      for (let i = 0, len = arguments.length; i < len; i++) {
+        args.push(arguments[i])
+      }
+      return cache.render.apply(cache, args)
+    }
+
+    // When the state gets stringified, make sure `state.cache` isn't
+    // stringified too.
+    renderComponent.toJSON = function () {
+      return null
+    }
+
   }
 }
